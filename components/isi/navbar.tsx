@@ -12,7 +12,7 @@ export default function Navbar() {
     {/* Menu */}
     <div className="flex items-center gap-6">
       <Link href="/">Home</Link>
-      <Link href="/menu">Menu</Link>
+      <Link href="/paket">Paket</Link>
       <Link href="/about">About</Link>
     </div>
 
