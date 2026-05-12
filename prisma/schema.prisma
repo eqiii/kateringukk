@@ -1,0 +1,161 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  level     Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pengirimans Pengiriman[]
+}
+
+model Pelanggan {
+  id       String   @id @default(cuid())
+  nama     String
+  email    String
+  password String
+  tglLahir DateTime
+  telepon  String
+  alamat1  String
+  alamat2  String?
+  alamat3  String?
+  kartuId  String?
+  foto     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pemesanans Pemesanan[]
+}
+
+model Paket {
+  id         String     @id @default(cuid())
+  namaPaket  String
+  jenis      JenisPaket
+  kategori   String
+  jumlahPax  Int
+  hargaPaket Int
+  deskripsi  String?
+
+  foto1 String?
+  foto2 String?
+  foto3 String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  details DetailPemesanan[]
+}
+
+model Pemesanan {
+  id          String      @id @default(cuid())
+  pelangganId String
+  jenisBayar  JenisBayar
+  noResi      String?
+  tglPesan    DateTime
+  statusPesan StatusPesan
+  totalBayar  Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pelanggan Pelanggan @relation(fields: [pelangganId], references: [id])
+
+  details    DetailPemesanan[]
+  pengiriman Pengiriman[]
+}
+
+model DetailPemesanan {
+  id          String @id @default(cuid())
+  pemesananId String
+  paketId     String
+  subtotal    Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pemesanan Pemesanan @relation(fields: [pemesananId], references: [id])
+  paket     Paket     @relation(fields: [paketId], references: [id])
+}
+
+model Pengiriman {
+  id          String      @id @default(cuid())
+  tglKirim    DateTime
+  tglTiba     DateTime?
+  statusKirim StatusKirim
+  buktiFoto   String?
+
+  pesananId String
+  userId    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pesanan Pemesanan @relation(fields: [pesananId], references: [id])
+  user    User      @relation(fields: [userId], references: [id])
+}
+
+model JenisPembayaran {
+  id               String @id @default(cuid())
+  metodePembayaran String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  details DetailJenisPembayaran[]
+}
+
+model DetailJenisPembayaran {
+  id                String  @id @default(cuid())
+  jenisPembayaranId String
+  noRek             String
+  tempatBayar       String
+  logo              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  jenisPembayaran JenisPembayaran @relation(fields: [jenisPembayaranId], references: [id])
+}
+
+enum Role {
+  admin
+  kurir
+}
+
+enum JenisPaket {
+  Prasmanan
+  Box
+}
+
+enum JenisBayar {
+  dp
+  lunas
+}
+
+enum StatusPesan {
+  Menunggu_Konfirmasi
+  Sedang_Diproses
+  Menunggu_Kurir
+}
+
+enum StatusKirim {
+  Sedang_Dikirim
+  Tiba_DiTujuan
+}
